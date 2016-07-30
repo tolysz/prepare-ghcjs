@@ -1,4 +1,4 @@
-resolver: nightly-2016-07-02
+resolver: nightly-2016-07-19
 allow-newer: true
 extra-deps:
 - rawstring-qm-0.2.2.2

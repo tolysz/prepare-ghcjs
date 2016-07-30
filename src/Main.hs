@@ -64,13 +64,13 @@ sync PrepConfig{..} = do
           mapM (getBootDescr . T.unpack) $ filter (`notElem` copyIgnore ) $ map T.init $ T.lines b
 --       print $ map showPkg p
       let p = map showPkg pa
-      writeFile "boot-ng.cabal" $ fakePackage ++ DL.concat ( DL.intersperse "," (map (T.unpack . fst) p))
+      writeFile "boot-ng.cabal" $ fakePackage ++ DL.intercalate "," (map (T.unpack . fst) p)
       echo "\n\n\nMain:"
       bootDeps <- listDependencies resolver
       let canCopy = p `DL.intersect` bootDeps
 
       putStrLn $ "have " ++ show (DL.sort (p DL.\\ canCopy))
-      putStrLn $ "need " ++ show (DL.sort (bootDeps DL.\\ canCopy))
+      putStrLn $ "need " ++ show (DL.sort (bootDeps DL.\\ (("boot-ng","0.1.0.0"):canCopy++forceVersion)))
     return ()
 
 
@@ -112,8 +112,8 @@ main = do
 --   mapM_ (uncurry getCabalPackage) =<< listDependencies s
 --   print =<< getDescr "upstream-git/ghcjs/ghcjs"
 
-  syncLts
---   syncNightly
+--   syncLts
+  syncNightly
 
 {-
 
