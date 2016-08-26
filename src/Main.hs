@@ -24,6 +24,7 @@ ltsCfg = PrepConfig
  , tag = "lts"
  , copyIgnore = ["cabal", "Win32"]
  , forceVersion = [("integer-gmp", "0.5.1.0")]
+ , forceFresh = [("mtl", "2.2.1")]
  }
 
 nightlyCfg = PrepConfig
@@ -33,6 +34,7 @@ nightlyCfg = PrepConfig
  , tag     = "nightly"
  , copyIgnore = ["cabal", "ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
  , forceVersion = [("integer-gmp", "1.0.0.1")]
+ , forceFresh = [("mtl", "2.2.1")]
  }
 
 sync :: PrepConfig -> IO ()
@@ -51,11 +53,18 @@ sync PrepConfig{..} = do
     updateVersion path extra
     mapM_ (uncurry getCabalPackage) deps
     print deps
+    mapM_ (uncurry getCabalPackage) =<< listDependencies resolver
     keepPath $ do
       cd workdir
       shell "rm -rf ghcjs-boot" empty
       cp "ghcjs-0.2.0/lib/cache/boot.tar" "boot.tar"
 --       echo "tar"
+     {-
+     cp ghcjs-0.2.0/lib/cache/boot.tar .
+     tar -xf boot.tar
+     cp patches/* ghcjs-boot/patches
+     -}
+
       shell "tar -xf boot.tar" empty
       shell "rm -f boot.tar" empty
       pa <- keepPath $ do
@@ -70,15 +79,39 @@ sync PrepConfig{..} = do
       let canCopy = p `DL.intersect` bootDeps
 
       putStrLn $ "have " ++ show (DL.sort (p DL.\\ canCopy))
-      putStrLn $ "need " ++ show (DL.sort (bootDeps DL.\\ (("boot-ng","0.1.0.0"):canCopy++forceVersion)))
+
+      let need = DL.sort (bootDeps DL.\\ (("boot-ng","0.1.0.0"):canCopy++forceVersion))
+      putStrLn $ "needa " ++ show need
+      keepPath $ do
+          cd "ghcjs-boot/boot"
+          forM (need ++ forceFresh) getPackage
+      shell "pwd" empty
+      shell "mkdir -p ghcjs-0.2.0/src-bin/haddock" empty
+      keepPath $ do
+         cd "ghcjs-0.2.0/src-bin/haddock"
+         shell "wget https://raw.githubusercontent.com/ghcjs/ghcjs/ghc-8.0/src-bin/haddock/ResponseFile.hs" empty
+      shell "tar -cf boot.tar ghcjs-boot" empty
+      shell "cp -f boot.tar ghcjs-0.2.0/lib/cache/" empty
+
+      let newName = "ghcjs-0.2.0." <> T.pack extra
+      shell ("mv ghcjs-0.2.0 " <> newName) empty
+      shell ("tar -zcf archive.tar.gz " <> newName) empty
+
+      shell ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/" <> (T.pack longFilename) <> ".tar.gz") empty
+      shell ("cp archive.tar.gz " <> newName <> "_ghc-8.0.1.tar.gz") empty
+--       forM canCopy print
     return ()
+
+getPackage p@(name, vers) = do
+  print p
+  let ver = name <> "-" <> vers
+  shell ("rm -rf " <> name ) empty
+  shell ("tar -zxf ../../../cabalCache/" <> ver <> ".tar.gz") empty
+  shell ("mv " <> ver <> " " <> name ) empty
 
 
 
      {-
-     cp ghcjs-0.2.0/lib/cache/boot.tar .
-     tar -xf boot.tar
-     cp patches/* ghcjs-boot/patches
 
      ./fetch-packages.sh
 
@@ -113,6 +146,7 @@ main = do
 --   print =<< getDescr "upstream-git/ghcjs/ghcjs"
 
 --   syncLts
+  syncLts
   syncNightly
 
 {-

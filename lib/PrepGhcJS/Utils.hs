@@ -4,7 +4,7 @@ import qualified Text.Printf as T
 import qualified Data.Text as T
 
 toVer sres@('l':'t':'s':'-':p) d =
-   let tv = T.printf "900%03d%03d" (read ma::Int) (read (tail mi)::Int)
+   let tv = T.printf "9%03d%03d" (read ma::Int) (read (tail mi)::Int)
    in
      (tv, "master-" ++ d ++ "-"  ++ sres ++ "-" ++ tv)
   where

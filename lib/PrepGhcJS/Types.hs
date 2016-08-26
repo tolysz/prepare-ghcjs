@@ -13,6 +13,7 @@ data PrepConfig = PrepConfig
  , tag           :: Text
  , copyIgnore    :: [Text]
  , forceVersion  :: [(Text, Text)]
+ , forceFresh    :: [(Text, Text)]
  }
 
 defPC = PrepConfig
