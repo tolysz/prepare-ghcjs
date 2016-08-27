@@ -14,6 +14,7 @@ data PrepConfig = PrepConfig
  , copyIgnore    :: [Text]
  , forceVersion  :: [(Text, Text)]
  , forceFresh    :: [(Text, Text)]
+ , ghc           :: Text
  }
 
 defPC = PrepConfig

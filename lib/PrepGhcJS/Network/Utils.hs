@@ -79,6 +79,10 @@ nightly = redirLocation "https://www.stackage.org/nightly"
 lts :: IO T.Text
 lts = redirLocation "https://www.stackage.org/lts"
 
+lts1 :: T.Text -> IO T.Text
+lts1 r =  return $ "lts-" <> r
+
+
 redirLocation url = do
   initReq <- parseRequest url
   let req = Si.setRequestIgnoreStatus $ ("GET" `setRequestMethod` initReq){redirectCount=0}

@@ -25,6 +25,7 @@ ltsCfg = PrepConfig
  , copyIgnore = ["cabal", "Win32"]
  , forceVersion = [("integer-gmp", "0.5.1.0")]
  , forceFresh = [("mtl", "2.2.1")]
+ , ghc = "7.10.3"
  }
 
 nightlyCfg = PrepConfig
@@ -34,7 +35,8 @@ nightlyCfg = PrepConfig
  , tag     = "nightly"
  , copyIgnore = ["cabal", "ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
  , forceVersion = [("integer-gmp", "1.0.0.1")]
- , forceFresh = [("mtl", "2.2.1")]
+ , forceFresh = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4")]
+ , ghc = "8.0.1"
  }
 
 sync :: PrepConfig -> IO ()
@@ -89,27 +91,39 @@ sync PrepConfig{..} = do
       shell "mkdir -p ghcjs-0.2.0/src-bin/haddock" empty
       keepPath $ do
          cd "ghcjs-0.2.0/src-bin/haddock"
-         shell "wget https://raw.githubusercontent.com/ghcjs/ghcjs/ghc-8.0/src-bin/haddock/ResponseFile.hs" empty
-      shell "tar -cf boot.tar ghcjs-boot" empty
-      shell "cp -f boot.tar ghcjs-0.2.0/lib/cache/" empty
+         shell' "wget https://raw.githubusercontent.com/ghcjs/ghcjs/ghc-8.0/src-bin/haddock/ResponseFile.hs"
+      shell' $ "cp -f ../spec-"<> ghc <> "/ghcjs-base.cabal ghcjs-boot/ghcjs/ghcjs-base/"
+      shell' "tar -cf boot.tar ghcjs-boot"
+      shell' "cp -f boot.tar ghcjs-0.2.0/lib/cache/"
+      shell' $ "cp -f ../spec-"<> ghc <> "/boot.yaml ghcjs-0.2.0/lib/etc/"
 
       let newName = "ghcjs-0.2.0." <> T.pack extra
-      shell ("mv ghcjs-0.2.0 " <> newName) empty
-      shell ("tar -zcf archive.tar.gz " <> newName) empty
+      shell' ("mv ghcjs-0.2.0 " <> newName)
+      shell' ("tar -zcf archive.tar.gz " <> newName)
 
-      shell ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/" <> (T.pack longFilename) <> ".tar.gz") empty
-      shell ("cp archive.tar.gz " <> newName <> "_ghc-8.0.1.tar.gz") empty
+--       shell' ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/" <> (T.pack longFilename) <> ".tar.gz")
+      echo ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/" <> (T.pack longFilename) <> ".tar.gz")
+      shell' ("cp archive.tar.gz ../archive/" <> (T.pack longFilename) <> ".tar.gz")
+      shell' ("cp archive.tar.gz " <> newName <> "_ghc-"<> ghc <>".tar.gz")
+--       shell' ("cp archive.tar.gz " <> newName <> "_ghc-8.0.1.tar.gz")
 --       forM canCopy print
     return ()
 
 getPackage p@(name, vers) = do
   print p
   let ver = name <> "-" <> vers
-  shell ("rm -rf " <> name ) empty
-  shell ("tar -zxf ../../../cabalCache/" <> ver <> ".tar.gz") empty
-  shell ("mv " <> ver <> " " <> name ) empty
+  shell' "pwd"
+  shell' ("rm -rf " <> name )
+  shell' ("tar -zxf ../../../cabalCache/" <> ver <> ".tar.gz")
+  shell' ("mv " <> ver <> " " <> name )
+  shell' ("wget https://hackage.haskell.org/package/"<> ver <>"/"<> name <>".cabal -O " <> name <> "/" <> name <>".cabal")
+  return ()
 
 
+shell' cmd = do
+   echo cmd
+   shell cmd empty
+   return ()
 
      {-
 
@@ -133,7 +147,7 @@ ghc-8.0-2016-07-02-nightly-2016-07-02-820160702
 --   ghcjsDeps resolver
 --   getDepsAt path resolver
 --   prepareLTS
-  return ()
+--   return ()
 
 syncLts = sync ltsCfg
 syncNightly = sync nightlyCfg
@@ -146,6 +160,11 @@ main = do
 --   print =<< getDescr "upstream-git/ghcjs/ghcjs"
 
 --   syncLts
+  sync (ltsCfg {checkResolver = lts1 "6.8"})
+  sync (ltsCfg {checkResolver = lts1 "6.9"})
+  sync (ltsCfg {checkResolver = lts1 "6.10"})
+  sync (ltsCfg {checkResolver = lts1 "6.11"})
+  sync (ltsCfg {checkResolver = lts1 "6.12"})
   syncLts
   syncNightly
 
