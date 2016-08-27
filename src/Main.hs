@@ -149,7 +149,7 @@ ghc-8.0-2016-07-02-nightly-2016-07-02-820160702
 --   prepareLTS
 --   return ()
 
--- syncLts = sync ltsCfg
+syncLts = sync ltsCfg
 syncNightly = sync nightlyCfg
 
 main = do
@@ -165,7 +165,7 @@ main = do
 --   sync (ltsCfg {checkResolver = lts1 "6.10"})
 --   sync (ltsCfg {checkResolver = lts1 "6.11"})
 --   sync (ltsCfg {checkResolver = lts1 "6.12"})
-  syncLts
+--   syncLts
   syncNightly
 
 {-
