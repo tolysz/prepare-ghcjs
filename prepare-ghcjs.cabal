@@ -2,8 +2,8 @@ name:                 prepare-ghcjs
 version:              0.1.0.0
 synopsis:             
 -- description:
--- license:
--- license-file:
+license:              BSD3
+license-file:         LICENSE
 homepage:             
 author:               Marcin Tolysz
 maintainer:           tolysz@gmail.com
