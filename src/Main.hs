@@ -102,8 +102,8 @@ sync PrepConfig{..} = do
       shell' ("tar -zcf archive.tar.gz " <> newName)
 
 --       shell' ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/" <> (T.pack longFilename) <> ".tar.gz")
-      echo ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/" <> (T.pack longFilename) <> ".tar.gz")
-      shell' ("cp archive.tar.gz ../archive/" <> (T.pack longFilename) <> ".tar.gz")
+      shell' ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/untested/" <> T.pack longFilename <> ".tar.gz")
+      shell' ("cp archive.tar.gz ../archive/" <> T.pack longFilename <> ".tar.gz")
       shell' ("cp archive.tar.gz " <> newName <> "_ghc-"<> ghc <>".tar.gz")
 --       shell' ("cp archive.tar.gz " <> newName <> "_ghc-8.0.1.tar.gz")
 --       forM canCopy print
@@ -149,7 +149,7 @@ ghc-8.0-2016-07-02-nightly-2016-07-02-820160702
 --   prepareLTS
 --   return ()
 
-syncLts = sync ltsCfg
+-- syncLts = sync ltsCfg
 syncNightly = sync nightlyCfg
 
 main = do
@@ -160,11 +160,11 @@ main = do
 --   print =<< getDescr "upstream-git/ghcjs/ghcjs"
 
 --   syncLts
-  sync (ltsCfg {checkResolver = lts1 "6.8"})
-  sync (ltsCfg {checkResolver = lts1 "6.9"})
-  sync (ltsCfg {checkResolver = lts1 "6.10"})
-  sync (ltsCfg {checkResolver = lts1 "6.11"})
-  sync (ltsCfg {checkResolver = lts1 "6.12"})
+--   sync (ltsCfg {checkResolver = lts1 "6.8"})
+--   sync (ltsCfg {checkResolver = lts1 "6.9"})
+--   sync (ltsCfg {checkResolver = lts1 "6.10"})
+--   sync (ltsCfg {checkResolver = lts1 "6.11"})
+--   sync (ltsCfg {checkResolver = lts1 "6.12"})
   syncLts
   syncNightly
 
