@@ -88,10 +88,6 @@ sync PrepConfig{..} = do
           cd "ghcjs-boot/boot"
           forM (need ++ forceFresh) getPackage
       shell "pwd" empty
-      shell "mkdir -p ghcjs-0.2.0/src-bin/haddock" empty
-      keepPath $ do
-         cd "ghcjs-0.2.0/src-bin/haddock"
-         shell' "wget https://raw.githubusercontent.com/ghcjs/ghcjs/ghc-8.0/src-bin/haddock/ResponseFile.hs"
       shell' $ "cp -f ../spec-"<> ghc <> "/ghcjs-base.cabal ghcjs-boot/ghcjs/ghcjs-base/"
       shell' "tar -cf boot.tar ghcjs-boot"
       shell' "cp -f boot.tar ghcjs-0.2.0/lib/cache/"
