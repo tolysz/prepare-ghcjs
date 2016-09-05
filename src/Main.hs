@@ -51,12 +51,6 @@ sync PrepConfig{..} = do
     let path = workdir </> "ghcjs-0.2.0"
     fixResolver path sres
     cp (path</> "stack.yaml") (workdir </> "stack.yaml")
-    deps <- ghcjsDeps path resolver
-    updateVersion path extra
-    mapM_ (uncurry getCabalPackage) deps
-    print "global:"
-    print deps
-    mapM_ (uncurry getCabalPackage) =<< listDependencies resolver
     keepPath $ do
       cd workdir
       shell "rm -rf ghcjs-boot" empty
@@ -70,6 +64,7 @@ sync PrepConfig{..} = do
 
       shell' "tar -xf boot.tar"
       shell' "rm -f boot.tar"
+
       pa <- keepPath $ do
           cd "ghcjs-boot/boot"
           (_,b) <- shellStrict "ls -d */" empty
@@ -77,6 +72,16 @@ sync PrepConfig{..} = do
 --       print $ map showPkg p
       let p = map showPkg pa
       writeFile "boot-ng.cabal" $ fakePackage ++ DL.intercalate "," (map (T.unpack . fst) p)
+
+      shell' "pwd"
+      deps <- ghcjsDeps "ghcjs-0.2.0" resolver
+      shell' "pwd"
+      updateVersion "ghcjs-0.2.0" extra
+      mapM_ (uncurry getCabalPackage) deps
+      print "global:"
+      print deps
+      mapM_ (uncurry getCabalPackage) =<< listDependencies resolver
+
       echo "\n\n\nMain:"
       bootDeps <- listDependencies resolver
       let canCopy = p `DL.intersect` bootDeps

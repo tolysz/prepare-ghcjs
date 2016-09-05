@@ -9,7 +9,7 @@ import Prelude hiding (FilePath)
 import PrepGhcJS.Types
 
 gitBase = "upstream-git"
-cabalCacheBase = "cabalCache"
+cabalCacheBase = "../cabalCache"
 
 gitCR = "git clone --recursive  "
 
