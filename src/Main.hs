@@ -54,6 +54,7 @@ sync PrepConfig{..} = do
     deps <- ghcjsDeps path resolver
     updateVersion path extra
     mapM_ (uncurry getCabalPackage) deps
+    print "global:"
     print deps
     mapM_ (uncurry getCabalPackage) =<< listDependencies resolver
     keepPath $ do
@@ -67,8 +68,8 @@ sync PrepConfig{..} = do
      cp patches/* ghcjs-boot/patches
      -}
 
-      shell "tar -xf boot.tar" empty
-      shell "rm -f boot.tar" empty
+      shell' "tar -xf boot.tar"
+      shell' "rm -f boot.tar"
       pa <- keepPath $ do
           cd "ghcjs-boot/boot"
           (_,b) <- shellStrict "ls -d */" empty
@@ -87,7 +88,7 @@ sync PrepConfig{..} = do
       keepPath $ do
           cd "ghcjs-boot/boot"
           forM (need ++ forceFresh) getPackage
-      shell "pwd" empty
+      shell' "pwd"
       shell' $ "cp -f ../spec-"<> ghc <> "/ghcjs-base.cabal ghcjs-boot/ghcjs/ghcjs-base/"
       shell' "tar -cf boot.tar ghcjs-boot"
       shell' "cp -f boot.tar ghcjs-0.2.0/lib/cache/"
