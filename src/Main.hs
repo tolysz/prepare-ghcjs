@@ -108,6 +108,9 @@ sync PrepConfig{..} = do
 getPackage p@(name, vers) = do
   print p
   let ver = name <> "-" <> vers
+  keepPath $ do
+     cd "../../../cabalCache/"
+     getCabalPackage name vers
   shell' "pwd"
   shell' ("rm -rf " <> name )
   shell' ("tar -zxf ../../../cabalCache/" <> ver <> ".tar.gz")
