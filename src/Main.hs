@@ -109,7 +109,7 @@ getPackage p@(name, vers) = do
   print p
   let ver = name <> "-" <> vers
   keepPath $ do
-     cd "../../../cabalCache/"
+     cd "../../../"
      getCabalPackage name vers
   shell' "pwd"
   shell' ("rm -rf " <> name )
