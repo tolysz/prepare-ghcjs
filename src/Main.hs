@@ -12,20 +12,18 @@ import Prelude hiding (FilePath)
 import PrepGhcJS.Types
 import PrepGhcJS.Utils
 
-
 snapshotCache :: FilePath
 snapshotCache = "pack"
--- workDir = "work"
 
 ltsCfg = PrepConfig
- { master  = "master.tar.gz"
+ { master  = "ghc-8.0.tar.gz"
  , workdir = "work-lts"
  , checkResolver = lts
- , tag = "lts"
- , copyIgnore = ["cabal", "Win32"]
- , forceVersion = [("integer-gmp", "0.5.1.0")]
- , forceFresh = [("mtl", "2.2.1")]
- , ghc = "7.10.3"
+ , tag     = "lts"
+ , copyIgnore = ["cabal", "ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
+ , forceVersion = [("integer-gmp", "1.0.0.1")]
+ , forceFresh = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4")]
+ , ghc = "8.0.1"
  }
 
 nightlyCfg = PrepConfig
@@ -55,12 +53,6 @@ sync PrepConfig{..} = do
       cd workdir
       shell "rm -rf ghcjs-boot" empty
       cp "ghcjs-0.2.0/lib/cache/boot.tar" "boot.tar"
---       echo "tar"
-     {-
-     cp ghcjs-0.2.0/lib/cache/boot.tar .
-     tar -xf boot.tar
-     cp patches/* ghcjs-boot/patches
-     -}
 
       shell' "tar -xf boot.tar"
       shell' "rm -f boot.tar"
@@ -89,39 +81,33 @@ sync PrepConfig{..} = do
       putStrLn $ "have " ++ show (DL.sort (p DL.\\ canCopy))
 
       let need = DL.sort (bootDeps DL.\\ (("boot-ng","0.1.0.0"):canCopy++forceVersion))
-      putStrLn $ "needa " ++ show need
+      putStrLn $ "need " ++ show need
       keepPath $ do
           cd "ghcjs-boot/boot"
           forM (need ++ forceFresh) getPackage
       shell' "pwd"
-      shell' $ "cp -f ../spec-"<> ghc <> "/ghcjs-base.cabal ghcjs-boot/ghcjs/ghcjs-base/"
+      shell' $ "cp -f ../spec-"<> tag <> "/ghcjs-base.cabal ghcjs-boot/ghcjs/ghcjs-base/"
       shell' "tar -cf boot.tar ghcjs-boot"
       shell' "cp -f boot.tar ghcjs-0.2.0/lib/cache/"
-      shell' $ "cp -f ../spec-"<> ghc <> "/boot.yaml ghcjs-0.2.0/lib/etc/"
+      shell' $ "cp -f ../spec-"<> tag <> "/boot.yaml ghcjs-0.2.0/lib/etc/"
 
       let newName = "ghcjs-0.2.0." <> T.pack extra
       shell' ("mv ghcjs-0.2.0 " <> newName)
       shell' ("tar -zcf archive.tar.gz " <> newName)
 
---       shell' ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/" <> (T.pack longFilename) <> ".tar.gz")
       shell' ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/untested/" <> T.pack longFilename <> ".tar.gz")
       shell' ("cp archive.tar.gz ../archive/" <> T.pack longFilename <> ".tar.gz")
       shell' ("cp archive.tar.gz " <> newName <> "_ghc-"<> ghc <>".tar.gz")
---       shell' ("cp archive.tar.gz " <> newName <> "_ghc-8.0.1.tar.gz")
---       forM canCopy print
+
     return ()
 
 getPackage p@(name, vers) = do
   print p
   let ver = name <> "-" <> vers
-  keepPath $ do
-     cd "../../../"
-     getCabalPackage name vers
   shell' "pwd"
   shell' ("rm -rf " <> name )
-  shell' ("tar -zxf ../../../cabalCache/" <> ver <> ".tar.gz")
+  shell' ("stack unpack " <> ver)
   shell' ("mv " <> ver <> " " <> name )
-  shell' ("wget https://hackage.haskell.org/package/"<> ver <>"/"<> name <>".cabal -O " <> name <> "/" <> name <>".cabal")
   return ()
 
 
@@ -170,7 +156,7 @@ main = do
 --   sync (ltsCfg {checkResolver = lts1 "6.10"})
 --   sync (ltsCfg {checkResolver = lts1 "6.11"})
 --   sync (ltsCfg {checkResolver = lts1 "6.12"})
---   syncLts
+  syncLts
   syncNightly
 
 {-
