@@ -15,6 +15,8 @@ data PrepConfig = PrepConfig
  , forceVersion  :: [(Text, Text)]
  , forceFresh    :: [(Text, Text)]
  , ghc           :: Text
+ , extraBoot     :: [Text]
+ , extraBuild     :: [Text]
  }
 
 defPC = PrepConfig

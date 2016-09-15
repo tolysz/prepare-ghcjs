@@ -24,6 +24,8 @@ ltsCfg = PrepConfig
  , forceVersion = [("integer-gmp", "1.0.0.1")]
  , forceFresh = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4")]
  , ghc = "8.0.1"
+ , extraBoot = []
+ , extraBuild = []
  }
 
 nightlyCfg = PrepConfig
@@ -33,8 +35,10 @@ nightlyCfg = PrepConfig
  , tag     = "nightly"
  , copyIgnore = ["cabal", "ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
  , forceVersion = [("integer-gmp", "1.0.0.1")]
- , forceFresh = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4")]
+ , forceFresh = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4"),("old-locale","1.0.0.7")]
  , ghc = "8.0.1"
+ , extraBoot = ["old-locale", "base-compat", "bytestring-builder", "time-locale-compat"]
+ , extraBuild = ["haskell-src-meta-0.6.0.14"]
  }
 
 sync :: PrepConfig -> IO ()
@@ -47,7 +51,7 @@ sync PrepConfig{..} = do
   when (upd || True) $ do
     upackTar workdir snapshotCache master
     let path = workdir </> "ghcjs-0.2.0"
-    fixResolver path sres
+    fixResolver path sres (map T.unpack extraBuild)
     cp (path</> "stack.yaml") (workdir </> "stack.yaml")
     keepPath $ do
       cd workdir
@@ -63,7 +67,7 @@ sync PrepConfig{..} = do
           mapM (getBootDescr . T.unpack) $ filter (`notElem` copyIgnore ) $ map T.init $ T.lines b
 --       print $ map showPkg p
       let p = map showPkg pa
-      writeFile "boot-ng.cabal" $ fakePackage ++ DL.intercalate "," (map (T.unpack . fst) p)
+      writeFile "boot-ng.cabal" $ fakePackage ++ DL.intercalate "," (map T.unpack $ extraBoot ++ map fst p)
 
       shell' "pwd"
       deps <- ghcjsDeps "ghcjs-0.2.0" resolver

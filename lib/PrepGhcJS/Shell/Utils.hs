@@ -44,9 +44,12 @@ git pull --recurse-submodules
 git submodule update --recursive
 -}
 
-fixResolver :: FilePath -> String  -> IO ()
-fixResolver fp res = writeFile (T.unpack (fromPath fp) ++ "/stack.yaml")
-     $ "resolver: " ++ res ++ "\nallow-newer: true\n"
+fixResolver :: FilePath -> String -> [String] -> IO ()
+fixResolver fp res extra = writeFile (T.unpack (fromPath fp) ++ "/stack.yaml")
+     $ "resolver: " ++ res ++ "\nallow-newer: true\n" ++ "\nextra-deps:" ++ processExtra extra ++ "\n"
+   where
+    processExtra [] = " []"
+    processExtra xs = concatMap (\x ->"\n- " ++ x) xs
 
 updateVersion :: FilePath -> String -> IO ()
 updateVersion fp extra =
