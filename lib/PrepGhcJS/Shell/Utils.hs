@@ -52,19 +52,19 @@ updateVersion :: FilePath -> String -> IO ()
 updateVersion fp extra =
    void $ shell ("sed \"s/^Version:.*/Version:        0.2.0."<> T.pack extra <>"/\" -i " <> fromPath fp <> "/ghcjs.cabal" ) empty
 
-getCabalPackage pkg pvers = do
-  mktree cabalCacheBase
-  let ver=pkg <> "-" <> pvers
-      verz= ver <> ".tar.gz"
-
-  let dst = cabalCacheBase </> fromText verz
-  let dst1 = fromPath dst
-  testfile dst >>= \case
---     True -> echo $ "cached: " <> ver
-    True -> return ()
-    False -> do
-       echo $ "miss: " <> ver
-       void $ shell ("wget https://hackage.haskell.org/package/"<> ver <>"/"<> verz <>" -O " <> dst1) empty
+-- getCabalPackage pkg pvers = do
+--   mktree cabalCacheBase
+--   let ver=pkg <> "-" <> pvers
+--       verz= ver <> ".tar.gz"
+--
+--   let dst = cabalCacheBase </> fromText verz
+--   let dst1 = fromPath dst
+--   testfile dst >>= \case
+-- --     True -> echo $ "cached: " <> ver
+--     True -> return ()
+--     False -> do
+--        echo $ "miss: " <> ver
+--        void $ shell ("wget https://hackage.haskell.org/package/"<> ver <>"/"<> verz <>" -O " <> dst1) empty
 
 -- ls upstream-git/ghcjs-boot/boot
 

@@ -69,10 +69,10 @@ sync PrepConfig{..} = do
       deps <- ghcjsDeps "ghcjs-0.2.0" resolver
       shell' "pwd"
       updateVersion "ghcjs-0.2.0" extra
-      mapM_ (uncurry getCabalPackage) deps
+--       mapM_ (uncurry getCabalPackage) deps
       print "global:"
       print deps
-      mapM_ (uncurry getCabalPackage) =<< listDependencies resolver
+--       mapM_ (uncurry getCabalPackage) =<< listDependencies resolver
 
       echo "\n\n\nMain:"
       bootDeps <- listDependencies resolver
