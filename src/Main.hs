@@ -11,35 +11,51 @@ import Turtle
 import Prelude hiding (FilePath)
 import PrepGhcJS.Types
 import PrepGhcJS.Utils
+import qualified Filesystem.Path.CurrentOS as FP
 
 snapshotCache :: FilePath
 snapshotCache = "pack"
 
 ltsCfg = PrepConfig
- { master  = "ghc-8.0.tar.gz"
- , workdir = "work-lts"
- , checkResolver = lts
- , tag     = "lts"
- , copyIgnore = ["cabal", "ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
- , forceVersion = [("integer-gmp", "1.0.0.1")]
- , forceFresh = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4")]
- , ghc = "8.0.1"
- , extraBoot = []
- , extraBuild = []
+ { master         = "ghc-8.0.tar.gz"
+ , workdir        = "work-lts"
+ , checkResolver  = lts
+ , tag            = "lts"
+ , copyIgnore     = ["cabal", "ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
+ , forceVersion   = [("integer-gmp", "1.0.0.1")]
+ , forceFresh     = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4")]
+ , ghc            = "8.0.1"
+ , extraBoot      = []
+ , extraBuild     = []
+ , nameSuffix     = ""
+ , overwriteFiles = [ ("ghcjs-base.cabal","ghcjs-boot/ghcjs/ghcjs-base/")
+                    , ("boot.yaml", "ghcjs-0.2.0/lib/etc/")
+                    ]
  }
 
 nightlyCfg = PrepConfig
- { master  = "ghc-8.0.tar.gz"
- , workdir = "work-nightly"
- , checkResolver = nightly
- , tag     = "nightly"
- , copyIgnore = ["cabal", "ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
- , forceVersion = [("integer-gmp", "1.0.0.1")]
- , forceFresh = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4"),("old-locale","1.0.0.7")]
- , ghc = "8.0.1"
- , extraBoot = ["old-locale", "base-compat", "bytestring-builder", "time-locale-compat"]
- , extraBuild = ["haskell-src-meta-0.6.0.14"]
+ { master         = "ghc-8.0.tar.gz"
+ , workdir        = "work-nightly"
+ , checkResolver  = nightly
+ , tag            = "nightly"
+ , copyIgnore     = ["cabal", "ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
+ , forceVersion   = [("integer-gmp", "1.0.0.1")]
+ , forceFresh     = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4"),("old-locale","1.0.0.7")]
+ , ghc            = "8.0.1"
+ , extraBoot      = ["old-locale", "base-compat", "bytestring-builder", "time-locale-compat"] -- aeson
+ , extraBuild     = ["haskell-src-meta-0.6.0.14"]
+ , nameSuffix     = ""
+ , overwriteFiles = [ ("ghcjs-base.cabal","ghcjs-boot/ghcjs/ghcjs-base/")
+                    , ("boot.yaml", "ghcjs-0.2.0/lib/etc/")
+                    ]
  }
+
+
+ghcjsVanila :: Text
+ghcjsVanila = "ghcjs-0.2.1"
+
+ghcjsVanilaFP :: FilePath
+ghcjsVanilaFP =  FP.fromText ghcjsVanila
 
 sync :: PrepConfig -> IO ()
 sync PrepConfig{..} = do
@@ -50,13 +66,13 @@ sync PrepConfig{..} = do
   print b
   when (upd || True) $ do
     upackTar workdir snapshotCache master
-    let path = workdir </> "ghcjs-0.2.0"
+    let path = workdir </> ghcjsVanilaFP
     fixResolver path sres (map T.unpack extraBuild)
     cp (path</> "stack.yaml") (workdir </> "stack.yaml")
     keepPath $ do
       cd workdir
       shell "rm -rf ghcjs-boot" empty
-      cp "ghcjs-0.2.0/lib/cache/boot.tar" "boot.tar"
+      cp (ghcjsVanilaFP <> "/lib/cache/boot.tar") "boot.tar"
 
       shell' "tar -xf boot.tar"
       shell' "rm -f boot.tar"
@@ -70,9 +86,9 @@ sync PrepConfig{..} = do
       writeFile "boot-ng.cabal" $ fakePackage ++ DL.intercalate "," (map T.unpack $ extraBoot ++ map fst p)
 
       shell' "pwd"
-      deps <- ghcjsDeps "ghcjs-0.2.0" resolver
+      deps <- ghcjsDeps ghcjsVanilaFP resolver
       shell' "pwd"
-      updateVersion "ghcjs-0.2.0" extra
+      updateVersion ghcjsVanilaFP extra
 --       mapM_ (uncurry getCabalPackage) deps
       print "global:"
       print deps
@@ -90,17 +106,19 @@ sync PrepConfig{..} = do
           cd "ghcjs-boot/boot"
           forM (need ++ forceFresh) getPackage
       shell' "pwd"
-      shell' $ "cp -f ../spec-"<> tag <> "/ghcjs-base.cabal ghcjs-boot/ghcjs/ghcjs-base/"
-      shell' "tar -cf boot.tar ghcjs-boot"
-      shell' "cp -f boot.tar ghcjs-0.2.0/lib/cache/"
-      shell' $ "cp -f ../spec-"<> tag <> "/boot.yaml ghcjs-0.2.0/lib/etc/"
+      --- here
 
-      let newName = "ghcjs-0.2.0." <> T.pack extra
-      shell' ("mv ghcjs-0.2.0 " <> newName)
+      mapM_ (\(f,p) -> shell' $ "cp -f ../spec-"<> tag <> "/" <> f <> " " <> p) overwriteFiles
+
+      shell' "tar -cf boot.tar ghcjs-boot"
+      shell' $ "cp -f boot.tar " <> ghcjsVanila <> "/lib/cache/"
+
+      let newName = ghcjsVanila <> "." <> T.pack extra
+      shell' ("mv " <> ghcjsVanila <> " " <> newName)
       shell' ("tar -zcf archive.tar.gz " <> newName)
 
-      shell' ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/untested/" <> T.pack longFilename <> ".tar.gz")
-      shell' ("cp archive.tar.gz ../archive/" <> T.pack longFilename <> ".tar.gz")
+      shell' ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/untested/" <> T.pack longFilename <> nameSuffix <> ".tar.gz")
+      shell' ("cp archive.tar.gz ../archive/" <> T.pack longFilename <> nameSuffix <> ".tar.gz")
       shell' ("cp archive.tar.gz " <> newName <> "_ghc-"<> ghc <>".tar.gz")
 
     return ()
@@ -146,6 +164,10 @@ ghc-8.0-2016-07-02-nightly-2016-07-02-820160702
 
 syncLts = sync ltsCfg
 syncNightly = sync nightlyCfg
+syncLtsMem = sync ltsCfg{nameSuffix="-mem", overwriteFiles = [ ("ghcjs-base.cabal","ghcjs-boot/ghcjs/ghcjs-base/")
+                                                             , ("boot.yaml", "ghcjs-0.2.0/lib/etc/")
+                                                             , ("thrunner.js", "ghcjs-0.2.0/lib/etc/")
+                                                             ]}
 
 main = do
   putStr "works"
@@ -161,6 +183,7 @@ main = do
 --   sync (ltsCfg {checkResolver = lts1 "6.11"})
 --   sync (ltsCfg {checkResolver = lts1 "6.12"})
   syncLts
+  syncLtsMem
   syncNightly
 
 {-

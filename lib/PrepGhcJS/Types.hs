@@ -14,9 +14,11 @@ data PrepConfig = PrepConfig
  , copyIgnore    :: [Text]
  , forceVersion  :: [(Text, Text)]
  , forceFresh    :: [(Text, Text)]
+ , overwriteFiles:: [(Text, Text)]
  , ghc           :: Text
+ , nameSuffix    :: Text
  , extraBoot     :: [Text]
- , extraBuild     :: [Text]
+ , extraBuild    :: [Text]
  }
 
 defPC = PrepConfig
