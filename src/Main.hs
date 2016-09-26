@@ -29,7 +29,7 @@ ltsCfg = PrepConfig
  , extraBuild     = []
  , nameSuffix     = ""
  , overwriteFiles = [ ("ghcjs-base.cabal","ghcjs-boot/ghcjs/ghcjs-base/")
-                    , ("boot.yaml", "ghcjs-0.2.0/lib/etc/")
+                    , ("boot.yaml", ghcjsVanila <> "/lib/etc/")
                     ]
  }
 
@@ -46,7 +46,7 @@ nightlyCfg = PrepConfig
  , extraBuild     = ["haskell-src-meta-0.6.0.14"]
  , nameSuffix     = ""
  , overwriteFiles = [ ("ghcjs-base.cabal","ghcjs-boot/ghcjs/ghcjs-base/")
-                    , ("boot.yaml", "ghcjs-0.2.0/lib/etc/")
+                    , ("boot.yaml", ghcjsVanila <> "/lib/etc/")
                     ]
  }
 
@@ -165,8 +165,8 @@ ghc-8.0-2016-07-02-nightly-2016-07-02-820160702
 syncLts = sync ltsCfg
 syncNightly = sync nightlyCfg
 syncLtsMem = sync ltsCfg{nameSuffix="-mem", overwriteFiles = [ ("ghcjs-base.cabal","ghcjs-boot/ghcjs/ghcjs-base/")
-                                                             , ("boot.yaml", "ghcjs-0.2.0/lib/etc/")
-                                                             , ("thrunner.js", "ghcjs-0.2.0/lib/etc/")
+                                                             , ("boot.yaml", ghcjsVanila <> "/lib/etc/")
+                                                             , ("thrunner.js", ghcjsVanila <> "/lib/etc/")
                                                              ]}
 
 main = do
