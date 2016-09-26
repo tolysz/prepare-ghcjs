@@ -53,7 +53,7 @@ fixResolver fp res extra = writeFile (T.unpack (fromPath fp) ++ "/stack.yaml")
 
 updateVersion :: FilePath -> String -> IO ()
 updateVersion fp extra =
-   void $ shell ("sed \"s/^Version:.*/Version:        0.2.0."<> T.pack extra <>"/\" -i " <> fromPath fp <> "/ghcjs.cabal" ) empty
+   void $ shell ("sed \"s/^Version:.*/Version:        0.2.1."<> T.pack extra <>"/\" -i " <> fromPath fp <> "/ghcjs.cabal" ) empty
 
 -- getCabalPackage pkg pvers = do
 --   mktree cabalCacheBase
