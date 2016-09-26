@@ -72,7 +72,7 @@ sync PrepConfig{..} = do
     keepPath $ do
       cd workdir
       shell "rm -rf ghcjs-boot" empty
-      cp (ghcjsVanilaFP <> "/lib/cache/boot.tar") "boot.tar"
+      cp (ghcjsVanilaFP </> "lib/cache/boot.tar") "boot.tar"
 
       shell' "tar -xf boot.tar"
       shell' "rm -f boot.tar"
