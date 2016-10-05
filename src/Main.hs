@@ -43,7 +43,7 @@ nightlyCfg = PrepConfig
  , forceFresh     = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4"),("old-locale","1.0.0.7")]
  , ghc            = "8.0.1"
  , extraBoot      = ["old-locale", "base-compat", "bytestring-builder", "time-locale-compat"] -- aeson
- , extraBuild     = ["haskell-src-meta-0.6.0.14"]
+ , extraBuild     = []
  , nameSuffix     = ""
  , overwriteFiles = [ ("ghcjs-base.cabal","ghcjs-boot/ghcjs/ghcjs-base/")
                     , ("boot.yaml", ghcjsVanila <> "/lib/etc/")
