@@ -1,0 +1,53 @@
+# trivial gitignore file
+.cabal-sandbox/
+cabal.sandbox.config
+cabal-dev/
+.hpc/
+*.hi
+*.o
+*.p_hi
+*.prof
+*.tix
+cabal.config
+dist
+dist-*
+.ghc.environment.*
+
+/Cabal/dist/
+/Cabal/tests/Setup
+/Cabal/Setup
+/Cabal/source-file-list
+
+/cabal-install/dist/
+/cabal-install/Setup
+/cabal-install/source-file-list
+
+
+# editor temp files
+
+*#
+.#*
+*~
+.*.swp
+
+# GHC build
+
+Cabal/GNUmakefile
+Cabal/dist-boot/
+Cabal/dist-install/
+Cabal/ghc.mk
+
+
+# TAGS files
+TAGS
+tags
+
+# stack artifacts
+/.stack-work/
+
+# Shake artifacts
+.shake*
+progress.txt
+
+# test files
+dist-test

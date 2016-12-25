@@ -21,7 +21,8 @@ ltsCfg = PrepConfig
  , workdir        = "work-lts"
  , checkResolver  = lts
  , tag            = "lts"
- , copyIgnore     = ["cabal", "ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
+ , copyIgnore     = ["ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
+ , copyOverride   = ["cabal"]
  , forceVersion   = [("integer-gmp", "1.0.0.1")]
  , forceFresh     = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4")]
  , ghc            = "8.0.1"
@@ -39,6 +40,7 @@ nightlyCfg = PrepConfig
  , checkResolver  = nightly
  , tag            = "nightly"
  , copyIgnore     = ["cabal", "ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
+ , copyOverride   = []
  , forceVersion   = [("integer-gmp", "1.0.0.1")]
  , forceFresh     = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4"),("old-locale","1.0.0.7")]
  , ghc            = "8.0.1"
@@ -80,7 +82,7 @@ sync PrepConfig{..} = do
       pa <- keepPath $ do
           cd "ghcjs-boot/boot"
           (_,b) <- shellStrict "ls -d */" empty
-          mapM (getBootDescr . T.unpack) $ filter (`notElem` copyIgnore ) $ map T.init $ T.lines b
+          mapM (getBootDescr . T.unpack) $ filter (`notElem` (copyIgnore <> copyOverride) ) $ map T.init $ T.lines b
 --       print $ map showPkg p
       let p = map showPkg pa
       writeFile "boot-ng.cabal" $ fakePackage ++ DL.intercalate "," (map T.unpack $ extraBoot ++ map fst p)
@@ -109,6 +111,8 @@ sync PrepConfig{..} = do
       --- here
 
       mapM_ (\(f,p) -> shell' $ "cp -f ../spec-"<> tag <> "/" <> f <> " " <> p) overwriteFiles
+      mapM_ (\f -> shell' $ "rm -rf ghcjs-boot/boot/"<>f) copyOverride
+      mapM_ (\f -> shell' $ "cp -rf ../spec-"<> tag <> "/" <> f <> " " <> "ghcjs-boot/boot/"<>f) copyOverride
 
       shell' "tar -cf boot.tar ghcjs-boot"
       shell' $ "cp -f boot.tar " <> ghcjsVanila <> "/lib/cache/"
@@ -183,8 +187,8 @@ main = do
 --   sync (ltsCfg {checkResolver = lts1 "6.11"})
 --   sync (ltsCfg {checkResolver = lts1 "6.12"})
   syncLts
-  syncLtsMem
-  syncNightly
+--   syncLtsMem
+--   syncNightly
 
 {-
 

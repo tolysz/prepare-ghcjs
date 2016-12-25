@@ -12,6 +12,7 @@ data PrepConfig = PrepConfig
  , checkResolver :: IO Text
  , tag           :: Text
  , copyIgnore    :: [Text]
+ , copyOverride  :: [Text]
  , forceVersion  :: [(Text, Text)]
  , forceFresh    :: [(Text, Text)]
  , overwriteFiles:: [(Text, Text)]
