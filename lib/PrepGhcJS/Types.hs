@@ -18,6 +18,7 @@ data PrepConfig = PrepConfig
  , overwriteFiles:: [(Text, Text)]
  , ghc           :: Text
  , nameSuffix    :: Text
+ , extraBlob   :: Text
  , extraBoot     :: [Text]
  , extraBuild    :: [Text]
  }

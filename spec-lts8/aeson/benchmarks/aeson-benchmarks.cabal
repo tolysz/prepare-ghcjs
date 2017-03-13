@@ -1,0 +1,223 @@
+name:                aeson-benchmarks
+version:             0
+build-type:          Simple
+
+cabal-version:       >=1.8
+
+flag bytestring-builder
+  description: Depend on the bytestring-builder package for backwards compatibility.
+  default: False
+  manual: False
+
+library
+  hs-source-dirs: .. .
+  c-sources:  ../cbits/unescape_string.c
+  exposed-modules:
+    Data.Aeson
+    Data.Aeson.Encoding
+    Data.Aeson.Encoding.Builder
+    Data.Aeson.Encoding.Internal
+    Data.Aeson.Internal
+    Data.Aeson.Internal.Functions
+    Data.Aeson.Internal.Time
+    Data.Aeson.Parser
+    Data.Aeson.Parser.Internal
+    Data.Aeson.Parser.Time
+    Data.Aeson.Parser.Unescape
+    Data.Aeson.TH
+    Data.Aeson.Text
+    Data.Aeson.Types
+    Data.Aeson.Types.Class
+    Data.Aeson.Types.FromJSON
+    Data.Aeson.Types.Generic
+    Data.Aeson.Types.Internal
+    Data.Aeson.Types.ToJSON
+
+  build-depends:
+    attoparsec >= 0.13.0.1,
+    base == 4.*,
+    base-compat >= 0.9.1 && <0.10,
+    time-locale-compat >=0.1.1 && <0.2,
+    containers,
+    deepseq,
+    dlist >= 0.2,
+    fail == 4.9.*,
+    ghc-prim >= 0.2,
+    hashable >= 1.1.2.0,
+    mtl,
+    scientific >= 0.3.4.7 && < 0.4,
+    syb,
+    tagged >=0.8.3 && <0.9,
+    template-haskell >= 2.4,
+    text >= 1.1.1.0,
+    time,
+    transformers,
+    unordered-containers >= 0.2.3.0,
+    vector >= 0.7.1
+
+  if flag(bytestring-builder)
+    build-depends: bytestring >= 0.9 && < 0.10.4,
+                   bytestring-builder >= 0.10.4 && < 1
+  else
+    build-depends: bytestring >= 0.10.4
+
+  if impl(ghc >=7.8)
+    cpp-options: -DHAS_COERCIBLE
+
+  if !impl(ghc >= 8.0)
+    -- `Data.Semigroup` is available in base only since GHC 8.0 / base 4.9
+    build-depends: semigroups >= 0.18.2 && < 0.19
+
+  include-dirs: ../include
+
+  ghc-options: -O2 -Wall
+  cpp-options: -DGENERICS
+
+executable aeson-benchmark-compare
+  main-is: Compare.hs
+  hs-source-dirs: ../examples .
+  ghc-options: -Wall -O2 -rtsopts
+  build-depends:
+    aeson-benchmarks,
+    base,
+    base-compat,
+    buffer-builder,
+    bytestring,
+    criterion >= 1.0,
+    deepseq,
+    ghc-prim,
+    json-builder,
+    text
+
+executable aeson-benchmark-micro
+  main-is: Micro.hs
+  hs-source-dirs: ../examples .
+  ghc-options: -Wall -O2 -rtsopts
+  build-depends:
+    aeson-benchmarks,
+    base,
+    base-compat,
+    bytestring,
+    criterion >= 1.0,
+    deepseq,
+    ghc-prim,
+    text
+
+executable aeson-benchmark-typed
+  main-is: Typed.hs
+  hs-source-dirs: ../examples .
+  ghc-options: -Wall -O2 -rtsopts
+  -- We must help ourself in situations when there is both
+  -- aeson and aeson-benchmakrs
+  cpp-options: -DHAS_BOTH_AESON_AND_BENCHMARKS
+  build-depends:
+    aeson,
+    aeson-benchmarks,
+    base,
+    base-compat,
+    criterion >= 1.0,
+    deepseq,
+    ghc-prim,
+    text,
+    time
+
+  if flag(bytestring-builder)
+    build-depends: bytestring >= 0.9 && < 0.10.4,
+                   bytestring-builder >= 0.10.4 && < 1
+  else
+    build-depends: bytestring >= 0.10.4
+
+executable aeson-benchmark-compare-with-json
+  main-is: CompareWithJSON.hs
+  ghc-options: -Wall -O2 -rtsopts
+  build-depends:
+    aeson-benchmarks,
+    base,
+    base-compat,
+    blaze-builder,
+    bytestring,
+    criterion,
+    deepseq,
+    json,
+    text
+
+executable aeson-benchmark-aeson-encode
+  main-is: AesonEncode.hs
+  ghc-options: -Wall -O2 -rtsopts
+  build-depends:
+    aeson-benchmarks,
+    attoparsec,
+    base,
+    base-compat,
+    bytestring,
+    deepseq,
+    time
+
+executable aeson-benchmark-aeson-parse
+  main-is: AesonParse.hs
+  ghc-options: -Wall -O2 -rtsopts
+  build-depends:
+    aeson-benchmarks,
+    attoparsec,
+    base,
+    base-compat,
+    bytestring,
+    time
+
+executable aeson-benchmark-json-parse
+  main-is: JsonParse.hs
+  ghc-options: -Wall -O2 -rtsopts
+  build-depends:
+    base,
+    base-compat,
+    deepseq,
+    json,
+    time
+
+executable aeson-benchmark-dates
+  main-is: Dates.hs
+  ghc-options: -Wall -O2 -rtsopts
+  build-depends:
+    base,
+    base-compat,
+    bytestring,
+    criterion,
+    deepseq,
+    aeson-benchmarks,
+    text,
+    time
+
+executable aeson-benchmark-map
+  main-is: AesonMap.hs
+  ghc-options: -Wall -O2 -rtsopts
+  build-depends:
+    aeson,
+    aeson-benchmarks,
+    base,
+    base-compat,
+    criterion >= 1.0,
+    bytestring,
+    containers,
+    deepseq,
+    hashable,
+    tagged,
+    text,
+    unordered-containers
+
+executable aeson-benchmark-foldable
+  main-is: AesonFoldable.hs
+  ghc-options: -Wall -O2 -rtsopts
+  build-depends:
+    aeson,
+    aeson-benchmarks,
+    base,
+    base-compat,
+    criterion >= 1.0,
+    bytestring,
+    containers,
+    deepseq,
+    hashable,
+    tagged,
+    text,
+    unordered-containers,
+    vector
