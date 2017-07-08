@@ -281,11 +281,10 @@ mode2Int SeekFromEnd  = (#const SEEK_END)
 -- | May throw an exception if this is an invalid descriptor.
 fdSeek :: Fd -> SeekMode -> FileOffset -> IO FileOffset
 fdSeek (Fd fd) mode off =
-##if defined(ghcjs_HOST_OS)
-  error "installHandler: not available for GHCJS"
-##else
-  throwErrnoIfMinus1 "fdSeek" (Base.c_lseek fd off (mode2Int mode))
-##endif
+ throwErrnoIfMinus1
+   "fdSeek"
+   (fmap fromIntegral $ Base.c_lseek fd (fromIntegral off) (mode2Int mode))
+
 -- -----------------------------------------------------------------------------
 -- Locking
 

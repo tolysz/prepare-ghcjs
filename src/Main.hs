@@ -41,12 +41,34 @@ lts8Cfg = PrepConfig
  , workdir        = "work-lts8"
  , checkResolver  = lts
  , tag            = "lts8"
- , copyIgnore     = ["ghc", "ghc-boot", "ghc-boot-th", "ghci", "integer-gmp", "Win32"]
- , copyOverride   = ["cabal", "aeson","base", "ghc", "ghc-boot", "ghc-boot-th", "ghci","unix"]
+ , copyIgnore     = [ "ghc"
+                    , "ghc-boot"
+                    , "ghc-boot-th"
+                    , "ghci"
+                    , "integer-gmp"
+                    , "Win32"
+                    ]
+ , copyOverride   = [ "cabal"
+                    , "aeson"
+                    , "base"
+                    , "ghc"
+                    , "ghc-boot"
+                    , "ghc-boot-th"
+                    , "ghci"
+                    , "unix"
+                    ]
  , forceVersion   = [("integer-gmp", "1.0.0.1")]
- , forceFresh     = [("mtl", "2.2.1"), ("transformers-compat","0.5.1.4")]
+ , forceFresh     = [ ("mtl", "2.2.1")
+                    , ("transformers-compat", "0.5.1.4")
+                    , ("old-locale", "1.0.0.7")
+                    ]
  , ghc            = "8.0.2"
- , extraBoot      = []
+ , extraBoot      = [ "base-compat"
+                    , "bytestring-builder"
+                    , "time-locale-compat"
+                    , "old-locale"          -- 
+                    , "integer-logrithms"   -- dependency for scientific > 0.3.4.10
+                    ]
  , extraBuild     = []
  , extraBlob      = [qt|
 packages:
@@ -151,13 +173,13 @@ sync PrepConfig{..} = do
 
       shell' "tar --exclude=.stack-work -cf boot.tar ghcjs-boot"
       shell' $ "cp -f boot.tar " <> ghcjsVanila <> "/lib/cache/"
-      shell' $ "cp -f boot.tar " <> "/home/m/.stack/programs/x86_64-linux/ghcjs-0.2.1.9008000_ghc-8.0.2/src/lib/cache/boot.tar"
+      -- shell' $ "cp -f boot.tar " <> "/home/m/.stack/programs/x86_64-linux/ghcjs-0.2.1.9008000_ghc-8.0.2/src/lib/cache/boot.tar"
 
       let newName = ghcjsVanila <> "." <> T.pack extra
       shell' ("mv " <> ghcjsVanila <> " " <> newName)
       shell' ("tar --exclude=.stack-work -zcf archive.tar.gz " <> newName)
 
-      shell' ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/untested/" <> T.pack longFilename <> nameSuffix <> ".tar.gz")
+      -- shell' ("scp archive.tar.gz ghcjs-host:/var/www/ghcjs/untested/" <> T.pack longFilename <> nameSuffix <> ".tar.gz")
       shell' ("cp archive.tar.gz ../archive/" <> T.pack longFilename <> nameSuffix <> ".tar.gz")
       shell' ("cp archive.tar.gz " <> newName <> "_ghc-"<> ghc <>".tar.gz")
 

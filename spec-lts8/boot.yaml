@@ -97,6 +97,7 @@ packages:
     - ./boot/mtl
     - ./boot/parallel
     - ./boot/scientific
+    - ./boot/integer-logarithms
     - ./boot/stm
     - ./boot/syb
     - ./boot/transformers-compat
@@ -139,10 +140,10 @@ sources:
   # these are only used for development builds
 
   shims-dev:             https://github.com/ghcjs/shims
-  shims-dev-branch:      master
+  shims-dev-branch:      ghc-8.0
 
   ghcjs-boot-dev:        https://github.com/ghcjs/ghcjs-boot
-  ghcjs-boot-dev-branch: master
+  ghcjs-boot-dev-branch: ghc-8.0
 
 
   # build tools for Windows (http url, local tar archive or directory)
@@ -196,7 +197,7 @@ programs:
   happy:      happy
   git:        git
   autoreconf: autoreconf
-
+  npm:        npm
   # ghcjs-boot has a built-in unpacker for uncompressed tar, this is only used for tar.gz, tar.bz2, tar.xz
   tar:        tar
 
