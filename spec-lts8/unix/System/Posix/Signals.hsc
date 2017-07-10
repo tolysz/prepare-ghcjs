@@ -110,7 +110,7 @@ import Data.Dynamic
 
 ##include "rts/Signals.h"
 
-import GHC.Conc
+import GHC.Conc hiding (Signal)
 
 -- -----------------------------------------------------------------------------
 -- Specific signals
