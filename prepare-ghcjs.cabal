@@ -46,6 +46,7 @@ executable prepare-ghcjs
                       , prepare-ghcjs
                       , turtle
                       , text
+                      , rawstring-qm
                       , system-filepath
   hs-source-dirs:       src
   default-language:     Haskell2010
